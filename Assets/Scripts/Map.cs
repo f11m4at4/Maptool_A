@@ -1,0 +1,15 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Map : MonoBehaviour
+{
+    //¸ÊÀÇ °¡·Î Å©±â
+    public int tileX;
+    //¸ÊÀÇ ¼¼·Î Å©±â
+    public int tileZ;
+
+    //¹Ù´Ú Prefab
+    public GameObject floor;
+    
+}
