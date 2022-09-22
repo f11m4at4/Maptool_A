@@ -11,5 +11,8 @@ public class Map : MonoBehaviour
 
     //바닥 Prefab
     public GameObject floor;
+
+    //파란색 큐브 Prefab
+    public GameObject blueCube;
     
 }

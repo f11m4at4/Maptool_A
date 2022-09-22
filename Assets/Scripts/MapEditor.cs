@@ -30,6 +30,12 @@ public class MapEditor : Editor
         //바닥 Prefab Field
         map.floor = (GameObject)EditorGUILayout.ObjectField("바닥", map.floor, typeof(GameObject), false);
 
+        //파란색 큐브 Prefab Field
+        map.blueCube = (GameObject)EditorGUILayout.ObjectField("파란색 큐브", map.blueCube, typeof(GameObject), false);
+
+        //공간을 추가하자
+        EditorGUILayout.Space();
+
         //바닥 생성 버튼
         if(GUILayout.Button("바닥 생성"))
         {
@@ -47,7 +53,13 @@ public class MapEditor : Editor
     //Scene 을 그리는 함수
     private void OnSceneGUI()
     {
+        //Map이 선택되었을 때, Scene에서 다른 오브젝트를 클릭해도 선택이 되지 않게 하기
+        int id = GUIUtility.GetControlID(FocusType.Passive);
+        HandleUtility.AddDefaultControl(id);
+
         DrawGrid();
+
+        CreateObject();
     }
 
     void DrawGrid()
@@ -86,5 +98,31 @@ public class MapEditor : Editor
         floor = (GameObject)PrefabUtility.InstantiatePrefab(map.floor);
         //tileX, tileY만큼 크기를 키운다
         floor.transform.localScale = new Vector3(map.tileX, 1, map.tileZ);
+    }
+
+    void CreateObject()
+    {
+        //현재 Input 이벤트 관리하는 친구...?
+        Event e = Event.current;
+        //마우스 눌렀다면
+        if(e.type == EventType.MouseDown)
+        {
+            //만약에 왼쪽 마우스 버튼을 누르지 않았다면
+            if (e.button != 0) return;
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                GameObject floor = GameObject.Find("Floor");
+                GameObject obj = (GameObject)PrefabUtility.InstantiatePrefab(map.blueCube);
+
+                int x = (int)hit.point.x;
+                int z = (int)hit.point.z;
+
+                obj.transform.position = new Vector3(x, hit.point.y, z);
+                obj.transform.parent = floor.transform;
+            }
+        }        
     }
 }
