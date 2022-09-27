@@ -18,7 +18,7 @@ public class MapEditor : Editor
     //Inspector를 그리는 함수
     public override void OnInspectorGUI()
     {
-        //base.OnInspectorGUI();
+       // base.OnInspectorGUI();
 
         map.tileX = EditorGUILayout.IntField("타일 가로", map.tileX);
         map.tileZ = EditorGUILayout.IntField("타일 세로", map.tileZ);
@@ -32,6 +32,17 @@ public class MapEditor : Editor
 
         //파란색 큐브 Prefab Field
         map.blueCube = (GameObject)EditorGUILayout.ObjectField("파란색 큐브", map.blueCube, typeof(GameObject), false);
+
+        //map.objs Field
+        EditorGUI.ChangeCheckScope check = new EditorGUI.ChangeCheckScope();
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("objs"));
+        if (check.changed)
+        {
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        //선택한 오브젝트 Idx Field
+        map.selectObjIdx = EditorGUILayout.IntField("선택 오브젝트", map.selectObjIdx);
 
         //공간을 추가하자
         EditorGUILayout.Space();
@@ -60,6 +71,31 @@ public class MapEditor : Editor
         DrawGrid();
 
         CreateObject();
+
+        DeleteObject();
+    }
+
+    void DeleteObject()
+    {
+        Event e = Event.current;
+
+        //마우스 왼쪽 버튼을 누르면 & 컨트롤 키를 누르고 있으면
+        if(e.type == EventType.MouseDown && e.button == 0 && e.control)
+        {
+            //마우스 포인터에서 Ray를 만들고
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            RaycastHit hit;
+            //만든 Ray를 발사해서 부딪힌 놈이 있다면
+            if(Physics.Raycast(ray, out hit))
+            {
+                //부딪힌 놈의 Layer가 Object라면
+                if(hit.transform.gameObject.layer == LayerMask.NameToLayer("Object"))
+                {
+                    //해당 오브젝트를 파괴하겠다
+                    DestroyImmediate(hit.transform.gameObject);
+                }
+            }   
+        }
     }
 
     void DrawGrid()
@@ -83,7 +119,6 @@ public class MapEditor : Editor
             Handles.DrawLine(start, end);
         }
     }
-
     
     void CreateFloor()
     {
@@ -105,17 +140,15 @@ public class MapEditor : Editor
         //현재 Input 이벤트 관리하는 친구...?
         Event e = Event.current;
         //마우스 눌렀다면
-        if(e.type == EventType.MouseDown)
+        if(e.type == EventType.MouseDown && e.button == 0 && !e.control)
         {
-            //만약에 왼쪽 마우스 버튼을 누르지 않았다면
-            if (e.button != 0) return;
-
             Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
                 GameObject floor = GameObject.Find("Floor");
-                GameObject obj = (GameObject)PrefabUtility.InstantiatePrefab(map.blueCube);
+                GameObject obj = (GameObject)PrefabUtility.InstantiatePrefab(
+                    map.objs[map.selectObjIdx]);
 
                 int x = (int)hit.point.x;
                 int z = (int)hit.point.z;
