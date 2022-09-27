@@ -9,16 +9,27 @@ using UnityEditor.SceneManagement;
 public class MapEditor : Editor
 {
     Map map;
+
+    //map.objs 들의 이름을 담을 변수
+    string[] objsName;
+
     //Hierarchy에서 클릭이 되었을 때 호출 되는 함수
     private void OnEnable()
     {
         map = (Map)target;
+
+        // 오브젝트들 이름 셋팅
+        objsName = new string[map.objs.Length];
+        for(int i = 0; i < map.objs.Length; i++)
+        {
+            objsName[i] = map.objs[i].name;
+        }
     }
 
     //Inspector를 그리는 함수
     public override void OnInspectorGUI()
     {
-       // base.OnInspectorGUI();
+        // base.OnInspectorGUI();
 
         map.tileX = EditorGUILayout.IntField("타일 가로", map.tileX);
         map.tileZ = EditorGUILayout.IntField("타일 세로", map.tileZ);
@@ -42,7 +53,7 @@ public class MapEditor : Editor
         }
 
         //선택한 오브젝트 Idx Field
-        map.selectObjIdx = EditorGUILayout.IntField("선택 오브젝트", map.selectObjIdx);
+        map.selectObjIdx = EditorGUILayout.Popup("선택 오브젝트", map.selectObjIdx, objsName);
 
         //공간을 추가하자
         EditorGUILayout.Space();
